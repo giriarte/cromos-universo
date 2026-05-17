@@ -1,7 +1,7 @@
 import { createServiceClient } from "@/lib/supabase";
 import type { Category } from "@/types/database";
 import CreateCategoryForm from "./CreateCategoryForm";
-import DeleteCategoryButton from "./DeleteCategoryButton";
+import EditCategoryRow from "./EditCategoryRow";
 
 export const revalidate = 0;
 
@@ -26,11 +26,7 @@ export default async function AdminCategoriesPage() {
           <tbody className="divide-y divide-gray-100">
             {categories.map((cat) => (
               <tr key={cat.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-4 py-3 font-medium">{cat.name}</td>
-                <td className="px-4 py-3 text-gray-400 font-mono text-xs">{cat.slug}</td>
-                <td className="px-4 py-3 text-right">
-                  <DeleteCategoryButton id={cat.id} name={cat.name} />
-                </td>
+                <EditCategoryRow cat={cat} />
               </tr>
             ))}
           </tbody>

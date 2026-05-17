@@ -13,6 +13,7 @@
   "dependencies": {
     "@auth/supabase-adapter": "^1.11.2",
     "@aws-sdk/client-s3": "^3.1048.0",
+    "@aws-sdk/client-ses": "^3.1048.0",
     "@aws-sdk/s3-request-presigner": "^3.1048.0",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.2.2",
