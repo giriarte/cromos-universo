@@ -9,11 +9,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const { id } = await params;
   const body = await req.json();
-  const { title, description, price, stock, status, thumbnail_url, extra_image_urls = [], removed_image_ids = [] } = body;
+  const { title, description, price, stock, status, category_id, thumbnail_url, extra_image_urls = [], removed_image_ids = [] } = body;
 
   const supabase = createServiceClient();
 
-  const update: Record<string, unknown> = { description, price, stock, status, thumbnail_url };
+  const update: Record<string, unknown> = { description, price, stock, status, category_id: category_id || null, thumbnail_url };
   if (title) {
     update.title = title;
     update.slug = slugify(title);
@@ -53,6 +53,19 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params;
   const supabase = createServiceClient();
+
+  const { count } = await supabase
+    .from("order_items")
+    .select("*", { count: "exact", head: true })
+    .eq("article_id", id);
+
+  if (count && count > 0) {
+    return NextResponse.json(
+      { error: "Este artículo tiene pedidos asociados y no puede eliminarse. Desactivalo en su lugar." },
+      { status: 409 }
+    );
+  }
+
   const { error } = await supabase.from("articles").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 

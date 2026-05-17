@@ -8,12 +8,14 @@ import {
   PhotoIcon,
   ShoppingBagIcon,
   UsersIcon,
+  TagIcon,
   ArrowRightStartOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: HomeIcon, exact: true },
   { href: "/admin/articles", label: "Artículos", icon: PhotoIcon, exact: false },
+  { href: "/admin/categories", label: "Categorías", icon: TagIcon, exact: false },
   { href: "/admin/orders", label: "Pedidos", icon: ShoppingBagIcon, exact: false },
   { href: "/admin/users", label: "Usuarios", icon: UsersIcon, exact: false },
 ];

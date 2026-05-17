@@ -8,14 +8,14 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { title, description, price, stock, status, thumbnail_url, extra_image_urls = [] } = body;
+  const { title, description, price, stock, status, category_id, thumbnail_url, extra_image_urls = [] } = body;
 
   const supabase = createServiceClient();
   const slug = slugify(title);
 
   const { data: article, error } = await supabase
     .from("articles")
-    .insert({ title, slug, description, price, stock, status, thumbnail_url })
+    .insert({ title, slug, description, price, stock, status, category_id: category_id || null, thumbnail_url })
     .select()
     .single();
 

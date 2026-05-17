@@ -16,7 +16,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function CheckoutPage() {
-  const { items, totalPrice, clear } = useCart();
+  const { items, totalPrice, clearForOrder } = useCart();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,8 +42,8 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Error al procesar el pedido");
 
-      clear();
-      window.location.href = data.init_point;
+      clearForOrder();
+      router.push("/checkout/success");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Error inesperado");
       setLoading(false);
@@ -94,7 +94,7 @@ export default function CheckoutPage() {
           disabled={loading}
           className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {loading ? "Procesando..." : "Pagar con MercadoPago"}
+          {loading ? "Enviando pedido..." : "Confirmar pedido"}
         </button>
       </form>
     </div>

@@ -7,7 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Image from "next/image";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import type { Article, ArticleImage } from "@/types/database";
+import type { Article, ArticleImage, Category } from "@/types/database";
+import { dailyPrefix } from "@/lib/utils";
 
 const schema = z.object({
   title: z.string().min(1, "Requerido"),
@@ -15,14 +16,16 @@ const schema = z.object({
   price: z.number({ message: "Ingresá un precio válido" }).positive("Debe ser mayor a 0"),
   stock: z.number({ message: "Ingresá un stock válido" }).int().min(0),
   status: z.enum(["active", "inactive"]),
+  category_id: z.string().nullable().optional(),
 });
 type FormValues = z.infer<typeof schema>;
 
 type Props = {
   article?: Article & { article_images?: ArticleImage[] };
+  categories: Category[];
 };
 
-export default function ArticleForm({ article }: Props) {
+export default function ArticleForm({ article, categories }: Props) {
   const router = useRouter();
   const isEditing = !!article;
 
@@ -42,6 +45,7 @@ export default function ArticleForm({ article }: Props) {
       price: article?.price ?? 0,
       stock: article?.stock ?? 0,
       status: article?.status ?? "active",
+      category_id: article?.category_id ?? null,
     },
   });
 
@@ -85,13 +89,13 @@ export default function ArticleForm({ article }: Props) {
 
       if (thumbnail) {
         const ext = thumbnail.name.split(".").pop();
-        thumbnailUrl = await uploadFile(thumbnail, `articles/${Date.now()}-thumb.${ext}`);
+        thumbnailUrl = await uploadFile(thumbnail, `${dailyPrefix()}${Date.now()}-thumb.${ext}`);
       }
 
       const extraUrls: string[] = [];
       for (const file of extraFiles) {
         const ext = file.name.split(".").pop();
-        const url = await uploadFile(file, `articles/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`);
+        const url = await uploadFile(file, `${dailyPrefix()}${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`);
         extraUrls.push(url);
       }
 
@@ -141,12 +145,24 @@ export default function ArticleForm({ article }: Props) {
           </Field>
         </div>
 
-        <Field label="Estado" error={errors.status?.message}>
-          <select {...register("status")} className={ic(false)}>
-            <option value="active">Activo</option>
-            <option value="inactive">Inactivo</option>
-          </select>
-        </Field>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Estado" error={errors.status?.message}>
+            <select {...register("status")} className={ic(false)}>
+              <option value="active">Activo</option>
+              <option value="inactive">Inactivo</option>
+            </select>
+          </Field>
+
+          <Field label="Categoría" error={undefined}>
+            <select {...register("category_id")} className={ic(false)}>
+              <option value="">Sin categoría</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </Field>
+        </div>
+
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col gap-4">

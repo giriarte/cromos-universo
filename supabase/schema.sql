@@ -117,12 +117,22 @@ create trigger articles_updated_at before update on articles
 create trigger orders_updated_at before update on orders
   for each row execute function set_updated_at();
 
--- RPC: decrement article stock (called from webhook)
+-- RPC: decrement article stock (called on order creation)
 create or replace function decrement_stock(article_id uuid, amount integer)
 returns void language plpgsql as $$
 begin
   update articles
   set stock = greatest(0, stock - amount)
+  where id = article_id;
+end;
+$$;
+
+-- RPC: restore article stock (called on order cancellation)
+create or replace function increment_stock(article_id uuid, amount integer)
+returns void language plpgsql as $$
+begin
+  update articles
+  set stock = stock + amount
   where id = article_id;
 end;
 $$;

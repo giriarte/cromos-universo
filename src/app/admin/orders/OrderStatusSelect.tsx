@@ -5,8 +5,7 @@ import { useState } from "react";
 
 const OPTIONS = [
   { value: "pending", label: "Pendiente" },
-  { value: "paid", label: "Pagado" },
-  { value: "shipped", label: "Enviado" },
+  { value: "confirmed", label: "Confirmado" },
   { value: "cancelled", label: "Cancelado" },
 ];
 

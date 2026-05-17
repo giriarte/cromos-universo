@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed-admin": "tsx scripts/seed-admin.ts"
+    "seed-admin": "tsx --env-file=.env.local scripts/seed-admin.ts",
+    "setup-s3": "tsx --env-file=.env.local scripts/setup-s3-lifecycle.ts"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.11.2",

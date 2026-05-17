@@ -2,27 +2,50 @@ import Link from "next/link";
 import Image from "next/image";
 import { createServiceClient } from "@/lib/supabase";
 import { formatPrice } from "@/lib/utils";
+import type { Category } from "@/types/database";
 import DeleteArticleButton from "./DeleteArticleButton";
+import CategoryFilter from "./CategoryFilter";
 
 export const revalidate = 0;
 
-export default async function AdminArticlesPage() {
+export default async function AdminArticlesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cat?: string }>;
+}) {
+  const { cat } = await searchParams;
   const supabase = createServiceClient();
-  const { data: articles } = await supabase
-    .from("articles")
-    .select("id, title, slug, price, stock, status, thumbnail_url, created_at")
-    .order("created_at", { ascending: false });
+
+  const [{ data: catData }, articlesResult] = await Promise.all([
+    supabase.from("categories").select("*").order("name"),
+    (() => {
+      let q = supabase
+        .from("articles")
+        .select("id, title, slug, price, stock, status, thumbnail_url, created_at, category_id")
+        .order("created_at", { ascending: false });
+      if (cat) q = q.eq("category_id", cat);
+      return q;
+    })(),
+  ]);
+
+  const categories = (catData ?? []) as Category[];
+  const articles = articlesResult.data ?? [];
+
+  const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c.name]));
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Artículos</h1>
-        <Link
-          href="/admin/articles/new"
-          className="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
-        >
-          + Nuevo artículo
-        </Link>
+        <div className="flex items-center gap-3">
+          <CategoryFilter categories={categories} selected={cat ?? ""} />
+          <Link
+            href="/admin/articles/new"
+            className="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+          >
+            + Nuevo artículo
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -31,6 +54,7 @@ export default async function AdminArticlesPage() {
             <tr>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Imagen</th>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Título</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-500">Categoría</th>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Precio</th>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Stock</th>
               <th className="px-4 py-3 text-left font-medium text-gray-500">Estado</th>
@@ -38,7 +62,7 @@ export default async function AdminArticlesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {(articles ?? []).map((a) => (
+            {articles.map((a) => (
               <tr key={a.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-4 py-3">
                   <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100">
@@ -51,6 +75,9 @@ export default async function AdminArticlesPage() {
                 </td>
                 <td className="px-4 py-3 font-medium max-w-xs">
                   <span className="line-clamp-1">{a.title}</span>
+                </td>
+                <td className="px-4 py-3 text-gray-500">
+                  {a.category_id ? categoryMap[a.category_id] ?? "–" : "–"}
                 </td>
                 <td className="px-4 py-3">{formatPrice(Number(a.price))}</td>
                 <td className="px-4 py-3">{a.stock}</td>
@@ -76,8 +103,10 @@ export default async function AdminArticlesPage() {
             ))}
           </tbody>
         </table>
-        {(!articles || articles.length === 0) && (
-          <div className="text-center py-12 text-gray-400 text-sm">No hay artículos todavía.</div>
+        {articles.length === 0 && (
+          <div className="text-center py-12 text-gray-400 text-sm">
+            {cat ? "No hay artículos en esta categoría." : "No hay artículos todavía."}
+          </div>
         )}
       </div>
     </div>

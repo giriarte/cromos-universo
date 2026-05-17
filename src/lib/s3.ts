@@ -16,7 +16,8 @@ export async function getUploadPresignedUrl(key: string, contentType: string) {
     Bucket: BUCKET,
     Key: key,
     ContentType: contentType,
-    ACL: "public-read",
+    // No ACL — new S3 buckets block ACLs by default.
+    // Public read access is granted via bucket policy instead.
   });
   const url = await getSignedUrl(s3, command, { expiresIn: 300 });
   return url;

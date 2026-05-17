@@ -16,7 +16,7 @@ export default function ImageGallery({ thumbnail, images, title }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-100">
-        <Image src={allImages[selected]} alt={`${title} imagen ${selected + 1}`} fill className="object-cover" />
+        <Image src={allImages[selected]} alt={`${title} imagen ${selected + 1}`} fill className="object-contain p-2" />
       </div>
       {allImages.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-1">

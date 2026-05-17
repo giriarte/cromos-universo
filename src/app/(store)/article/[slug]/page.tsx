@@ -42,7 +42,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           ) : (
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-100">
               {article.thumbnail_url ? (
-                <Image src={article.thumbnail_url} alt={article.title} fill className="object-cover" />
+                <Image src={article.thumbnail_url} alt={article.title} fill className="object-contain p-2" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">Sin imagen</div>
               )}
