@@ -1,11 +1,17 @@
+import { createServiceClient } from "@/lib/supabase";
+import type { Category } from "@/types/database";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartTimer from "@/components/CartTimer";
 
-export default function StoreLayout({ children }: { children: React.ReactNode }) {
+export default async function StoreLayout({ children }: { children: React.ReactNode }) {
+  const supabase = createServiceClient();
+  const { data } = await supabase.from("categories").select("*").order("name");
+  const categories = (data ?? []) as Category[];
+
   return (
     <>
-      <Header />
+      <Header categories={categories} />
       <main className="min-h-screen max-w-7xl mx-auto px-4 py-8">{children}</main>
       <Footer />
       <CartTimer />

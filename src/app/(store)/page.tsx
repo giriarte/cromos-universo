@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { createServiceClient } from "@/lib/supabase";
 import ArticleCard from "@/components/ArticleCard";
 import type { Article, Category } from "@/types/database";
@@ -20,11 +19,10 @@ export default async function HomePage({
 
   const supabase = createServiceClient();
 
-  // Fetch categories for sidebar
-  const { data: catData } = await supabase.from("categories").select("*").order("name");
-  const categories = (catData ?? []) as Category[];
+  // Resolve category slug → id (reuse categories already fetched by layout for the dropdown)
+  const { data: catData } = await supabase.from("categories").select("id, slug, name").order("name");
+  const categories = (catData ?? []) as Pick<Category, "id" | "slug" | "name">[];
 
-  // Resolve category slug → id
   let categoryId: string | null = null;
   let categoryName: string | null = null;
   if (cat) {
@@ -32,7 +30,6 @@ export default async function HomePage({
     if (found) { categoryId = found.id; categoryName = found.name; }
   }
 
-  // Fetch paginated articles
   let query = supabase
     .from("articles")
     .select("id, title, slug, price, thumbnail_url, stock, status", { count: "exact" })
@@ -47,92 +44,43 @@ export default async function HomePage({
   const totalPages = Math.ceil((count ?? 0) / PER_PAGE);
 
   return (
-    <div className="flex gap-6">
-      {/* Left sidebar — categories */}
-      <aside className="w-48 shrink-0 flex flex-col justify-between">
+    <div>
+      <div className="flex items-baseline justify-between mb-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3 px-3">Categorías</p>
-          <nav className="flex flex-col gap-1">
-            <Link
-              href="/"
-              className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
-                !cat ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              Todos
-            </Link>
-            {categories.map((c) => (
-              <Link
-                key={c.id}
-                href={`/?cat=${c.slug}`}
-                className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
-                  cat === c.slug ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {c.name}
-              </Link>
-            ))}
-          </nav>
+          <h1 className="text-2xl font-bold">{categoryName ?? "Catálogo"}</h1>
+          {count !== null && (
+            <p className="text-sm text-gray-400 mt-0.5">
+              {count} {count === 1 ? "artículo" : "artículos"}
+            </p>
+          )}
         </div>
-
-        <div className="px-3 pt-6">
-          <Image
-            src="/UninversoCromosLogo.png"
-            alt="Universo Cromos"
-            width={160}
-            height={48}
-            className="w-full h-auto object-contain"
-          />
-        </div>
-      </aside>
-
-      {/* Center content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">{categoryName ?? "Catálogo"}</h1>
-            {count !== null && (
-              <p className="text-sm text-gray-400 mt-0.5">
-                {count} {count === 1 ? "artículo" : "artículos"}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {articles.length === 0 ? (
-          <div className="text-center py-24 text-gray-400">
-            <p>No hay artículos en esta categoría.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {articles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
-          </div>
-        )}
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-10">
-            {page > 1 && (
-              <PaginationLink href={buildUrl(cat, page - 1)} label="← Anterior" />
-            )}
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <PaginationLink
-                key={p}
-                href={buildUrl(cat, p)}
-                label={String(p)}
-                active={p === page}
-              />
-            ))}
-
-            {page < totalPages && (
-              <PaginationLink href={buildUrl(cat, page + 1)} label="Siguiente →" />
-            )}
-          </div>
-        )}
       </div>
+
+      {articles.length === 0 ? (
+        <div className="text-center py-24 text-gray-400">
+          <p>No hay artículos en esta categoría.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          {articles.map((article) => (
+            <ArticleCard key={article.id} article={article} />
+          ))}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-10">
+          {page > 1 && (
+            <PaginationLink href={buildUrl(cat, page - 1)} label="← Anterior" />
+          )}
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <PaginationLink key={p} href={buildUrl(cat, p)} label={String(p)} active={p === page} />
+          ))}
+          {page < totalPages && (
+            <PaginationLink href={buildUrl(cat, page + 1)} label="Siguiente →" />
+          )}
+        </div>
+      )}
     </div>
   );
 }

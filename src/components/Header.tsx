@@ -1,16 +1,19 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { ShoppingCartIcon } from "@heroicons/react/24/outline";
+import CategoriesDropdown from "./CategoriesDropdown";
+import type { Category } from "@/types/database";
 
-export default function Header() {
+export default function Header({ categories = [] }: { categories?: Category[] }) {
   const { totalItems } = useCart();
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="/UninversoCromosLogo.png"
@@ -24,9 +27,9 @@ export default function Header() {
         </Link>
 
         <nav className="flex items-center gap-6">
-          <Link href="/" className="text-sm font-medium text-gray-600 hover:text-indigo-700 transition-colors">
-            Catálogo
-          </Link>
+          <Suspense fallback={<span className="text-sm text-gray-600">Categorías</span>}>
+            <CategoriesDropdown categories={categories} />
+          </Suspense>
           <Link href="/cart" className="relative p-2 text-gray-600 hover:text-indigo-700 transition-colors">
             <ShoppingCartIcon className="h-6 w-6" />
             {totalItems > 0 && (
