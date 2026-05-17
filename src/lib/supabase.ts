@@ -1,10 +1,9 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const supabase: SupabaseClient<any> = createClient(supabaseUrl, supabaseAnonKey);
+// Singleton — one client per Lambda instance, reused across requests
+let _serviceClient: SupabaseClient<any> | null = null;
 
 function peek(value: string | undefined): string {
   if (!value) return "(undefined)";
@@ -13,6 +12,8 @@ function peek(value: string | undefined): string {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createServiceClient(): SupabaseClient<any> {
+  if (_serviceClient) return _serviceClient;
+
   console.log("[env] NEXT_PUBLIC_SUPABASE_URL   :", peek(process.env.NEXT_PUBLIC_SUPABASE_URL));
   console.log("[env] NEXT_PUBLIC_SUPABASE_ANON_KEY:", peek(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY));
   console.log("[env] SUPABASE_SERVICE_ROLE_KEY  :", peek(process.env.SUPABASE_SERVICE_ROLE_KEY));
@@ -24,7 +25,9 @@ export function createServiceClient(): SupabaseClient<any> {
   console.log("[env] APP_S3_BUCKET              :", peek(process.env.APP_S3_BUCKET));
   console.log("[env] SES_FROM_EMAIL             :", peek(process.env.SES_FROM_EMAIL));
 
-  return createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  _serviceClient = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { persistSession: false },
   });
+
+  return _serviceClient;
 }
