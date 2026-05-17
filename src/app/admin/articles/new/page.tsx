@@ -2,6 +2,8 @@ import { createServiceClient } from "@/lib/supabase";
 import type { Category } from "@/types/database";
 import ArticleForm from "@/components/admin/ArticleForm";
 
+export const revalidate = 0;
+
 export default async function NewArticlePage() {
   const supabase = createServiceClient();
   const { data } = await supabase.from("categories").select("*").order("name");

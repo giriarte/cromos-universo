@@ -3,6 +3,8 @@ import { createServiceClient } from "@/lib/supabase";
 import type { Article, ArticleImage, Category } from "@/types/database";
 import ArticleForm from "@/components/admin/ArticleForm";
 
+export const revalidate = 0;
+
 export default async function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = createServiceClient();
