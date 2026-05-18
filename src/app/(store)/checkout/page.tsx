@@ -89,8 +89,9 @@ export default function CheckoutPage() {
       return;
     }
 
+    sessionStorage.setItem("cromos-order-success", "1");
     clearForOrder();
-    router.push("/cart?pedido=ok");
+    router.push("/cart");
   }
 
   async function onResendCode() {

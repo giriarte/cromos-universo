@@ -2,17 +2,22 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
 import { TrashIcon, ClockIcon, EnvelopeIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
-function CartPageInner() {
+export default function CartPage() {
   const { items, remove, updateQty, totalPrice } = useCart();
-  const searchParams = useSearchParams();
-  const orderSuccess = searchParams.get("pedido") === "ok";
+  const [orderSuccess, setOrderSuccess] = useState(false);
   const [busy, setBusy] = useState<string | null>(null); // articleId currently being updated
+
+  useEffect(() => {
+    if (sessionStorage.getItem("cromos-order-success") === "1") {
+      sessionStorage.removeItem("cromos-order-success");
+      setOrderSuccess(true);
+    }
+  }, []);
 
   if (items.length === 0) {
     return (
@@ -45,7 +50,7 @@ function CartPageInner() {
     setBusy(null);
   }
 
-  async function handleQty(articleId: string, newQty: number, currentQty: number) {
+  async function handleQty(articleId: string, newQty: number) {
     if (newQty < 1) {
       await handleRemove(articleId);
       return;
@@ -90,14 +95,14 @@ function CartPageInner() {
                 {!isWaitlist && (
                   <div className="flex items-center gap-2 mt-1">
                     <button
-                      onClick={() => handleQty(article.id, quantity - 1, quantity)}
+                      onClick={() => handleQty(article.id, quantity - 1)}
                       className="w-7 h-7 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 flex items-center justify-center font-semibold"
                     >
                       -
                     </button>
                     <span className="w-6 text-center text-sm font-medium">{quantity}</span>
                     <button
-                      onClick={() => handleQty(article.id, quantity + 1, quantity)}
+                      onClick={() => handleQty(article.id, quantity + 1)}
                       disabled={quantity >= article.stock}
                       className="w-7 h-7 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 flex items-center justify-center font-semibold disabled:opacity-40"
                     >
@@ -154,10 +159,3 @@ function CartPageInner() {
   );
 }
 
-export default function CartPage() {
-  return (
-    <Suspense>
-      <CartPageInner />
-    </Suspense>
-  );
-}
