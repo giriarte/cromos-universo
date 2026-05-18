@@ -25,11 +25,15 @@ async function cancelExpiredOrders() {
   for (const order of expired ?? []) {
     const { data: items } = await supabase
       .from("order_items")
-      .select("article_id, quantity")
+      .select("article_id, quantity, is_waitlist")
       .eq("order_id", order.id);
 
-    for (const item of (items ?? []) as { article_id: string; quantity: number }[]) {
-      await supabase.rpc("increment_stock", { article_id: item.article_id, amount: item.quantity });
+    for (const item of (items ?? []) as { article_id: string; quantity: number; is_waitlist: boolean }[]) {
+      if (item.is_waitlist) {
+        await supabase.rpc("increment_waitlist", { article_id: item.article_id, amount: item.quantity });
+      } else {
+        await supabase.rpc("increment_stock", { article_id: item.article_id, amount: item.quantity });
+      }
     }
 
     await supabase.from("orders").update({ status: "cancelled" }).eq("id", order.id);
