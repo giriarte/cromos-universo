@@ -32,7 +32,7 @@ export default async function HomePage({
 
   let query = supabase
     .from("articles")
-    .select("id, title, slug, price, thumbnail_url, stock, status", { count: "exact" })
+    .select("id, title, slug, price, thumbnail_url, stock, waitlist, status", { count: "exact" })
     .eq("status", "active")
     .order("created_at", { ascending: false })
     .range(from, to);
@@ -40,7 +40,7 @@ export default async function HomePage({
   if (categoryId) query = query.eq("category_id", categoryId);
 
   const { data, count } = await query;
-  const articles = (data ?? []) as Pick<Article, "id" | "title" | "slug" | "price" | "thumbnail_url" | "stock" | "status">[];
+  const articles = (data ?? []) as Pick<Article, "id" | "title" | "slug" | "price" | "thumbnail_url" | "stock" | "waitlist" | "status">[];
   const totalPages = Math.ceil((count ?? 0) / PER_PAGE);
 
   return (

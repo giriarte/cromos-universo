@@ -9,11 +9,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const { id } = await params;
   const body = await req.json();
-  const { title, description, price, stock, status, category_id, thumbnail_url, extra_image_urls = [], removed_image_ids = [] } = body;
+  const { title, description, price, stock, waitlist, status, category_id, thumbnail_url, extra_image_urls = [], removed_image_ids = [] } = body;
 
   const supabase = createServiceClient();
 
   const update: Record<string, unknown> = { description, price, stock, status, category_id: category_id || null, thumbnail_url };
+  if (waitlist !== undefined) update.waitlist = waitlist;
   if (title) {
     update.title = title;
     update.slug = slugify(title);

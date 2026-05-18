@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
         article_id: i.article.id,
         quantity: i.quantity,
         unit_price: i.article.price,
+        is_waitlist: i.isWaitlist ?? false,
       }))
     );
 

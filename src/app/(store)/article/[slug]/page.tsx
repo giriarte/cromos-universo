@@ -63,6 +63,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
               <p className="text-sm text-green-600 font-medium mb-4">
                 {article.stock === 1 ? "¡Último disponible!" : `${article.stock} disponibles`}
               </p>
+            ) : article.waitlist > 0 ? (
+              <p className="text-sm text-amber-600 font-medium mb-4">
+                Sin stock — {article.waitlist} lugar{article.waitlist === 1 ? "" : "es"} en lista de espera
+              </p>
             ) : (
               <p className="text-sm text-red-500 font-medium mb-4">Sin stock</p>
             )}

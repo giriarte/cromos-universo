@@ -112,21 +112,69 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
       {/* Order summary — always visible */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mb-6">
-        <h2 className="font-semibold text-lg mb-4">Tu pedido</h2>
-        <div className="flex flex-col gap-2 text-sm text-gray-600">
-          {items.map(({ article, quantity }) => (
-            <div key={article.id} className="flex justify-between">
-              <span className="line-clamp-1 flex-1 mr-4">{article.title} x{quantity}</span>
-              <span className="font-medium shrink-0">{formatPrice(article.price * quantity)}</span>
+      {(() => {
+        const confirmedItems = items.filter((i) => !i.isWaitlist);
+        const waitlistItems = items.filter((i) => i.isWaitlist);
+        const confirmedTotal = confirmedItems.reduce((s, i) => s + i.article.price * i.quantity, 0);
+        const waitlistTotal = waitlistItems.reduce((s, i) => s + i.article.price * i.quantity, 0);
+
+        return (
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mb-6">
+            <h2 className="font-semibold text-lg mb-4">Tu pedido</h2>
+
+            {confirmedItems.length > 0 && (
+              <div className="flex flex-col gap-2 text-sm text-gray-600 mb-3">
+                {confirmedItems.map(({ article, quantity }) => (
+                  <div key={article.id} className="flex justify-between">
+                    <span className="line-clamp-1 flex-1 mr-4">{article.title} x{quantity}</span>
+                    <span className="font-medium shrink-0">{formatPrice(article.price * quantity)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {waitlistItems.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 mb-2 mt-1">
+                  <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                    Lista de espera
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2 text-sm text-amber-800 bg-amber-50 rounded-xl px-3 py-2 mb-3">
+                  {waitlistItems.map(({ article, quantity }) => (
+                    <div key={article.id} className="flex justify-between">
+                      <span className="line-clamp-1 flex-1 mr-4">{article.title} x{quantity}</span>
+                      <span className="font-medium shrink-0">{formatPrice(article.price * quantity)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <div className="border-t border-gray-200 mt-3 pt-3 flex flex-col gap-1.5">
+              {confirmedItems.length > 0 && waitlistItems.length > 0 ? (
+                <>
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Total confirmado</span>
+                    <span className="font-semibold text-indigo-700">{formatPrice(confirmedTotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-amber-700">
+                    <span>Total lista de espera</span>
+                    <span className="font-semibold">{formatPrice(waitlistTotal)}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between font-bold text-base">
+                  <span>{waitlistItems.length > 0 ? "Total lista de espera" : "Total confirmado"}</span>
+                  <span className={waitlistItems.length > 0 ? "text-amber-700" : "text-indigo-700"}>
+                    {formatPrice(totalPrice)}
+                  </span>
+                </div>
+              )}
             </div>
-          ))}
-        </div>
-        <div className="border-t border-gray-200 mt-4 pt-4 flex justify-between font-bold text-base">
-          <span>Total</span>
-          <span className="text-indigo-700">{formatPrice(totalPrice)}</span>
-        </div>
-      </div>
+          </div>
+        );
+      })()}
 
       {step === "form" && (
         <form onSubmit={handleSubmit(onSendCode)} className="flex flex-col gap-6">

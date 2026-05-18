@@ -40,14 +40,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (current && current.status !== "cancelled") {
       const { data: orderItems } = await supabase
         .from("order_items")
-        .select("article_id, quantity")
+        .select("article_id, quantity, is_waitlist")
         .eq("order_id", id);
 
-      for (const item of (orderItems ?? []) as { article_id: string; quantity: number }[]) {
-        await supabase.rpc("increment_stock", {
-          article_id: item.article_id,
-          amount: item.quantity,
-        });
+      for (const item of (orderItems ?? []) as { article_id: string; quantity: number; is_waitlist: boolean }[]) {
+        if (item.is_waitlist) {
+          await supabase.rpc("increment_waitlist", { article_id: item.article_id, amount: item.quantity });
+        } else {
+          await supabase.rpc("increment_stock", { article_id: item.article_id, amount: item.quantity });
+        }
       }
     }
   }

@@ -29,6 +29,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     id: string;
     quantity: number;
     unit_price: number;
+    is_waitlist: boolean;
     articles: { id: string; title: string; thumbnail_url: string | null; slug: string } | null;
   }[];
 
@@ -61,37 +62,64 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       {/* Items */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-4">
         <h2 className="font-semibold mb-4">Artículos</h2>
-        <div className="flex flex-col gap-3">
-          {orderItems.map((item) => (
-            <div key={item.id} className="flex items-center gap-3">
-              <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                {item.articles?.thumbnail_url ? (
-                  <Image
-                    src={item.articles.thumbnail_url}
-                    alt={item.articles.title}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">–</div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium line-clamp-1">{item.articles?.title ?? "Artículo eliminado"}</p>
-                <p className="text-xs text-gray-400">
-                  {item.quantity} × {formatPrice(Number(item.unit_price))}
-                </p>
-              </div>
-              <p className="text-sm font-semibold shrink-0">
-                {formatPrice(Number(item.unit_price) * item.quantity)}
-              </p>
+
+        {/* Confirmed items */}
+        {orderItems.filter((i) => !i.is_waitlist).length > 0 && (
+          <div className="flex flex-col gap-3 mb-4">
+            {orderItems.filter((i) => !i.is_waitlist).map((item) => (
+              <ItemRow key={item.id} item={item} />
+            ))}
+          </div>
+        )}
+
+        {/* Waitlist items */}
+        {orderItems.filter((i) => i.is_waitlist).length > 0 && (
+          <>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                Lista de espera
+              </span>
             </div>
-          ))}
-        </div>
-        <div className="border-t border-gray-200 mt-4 pt-4 flex justify-between font-bold">
-          <span>Total</span>
-          <span className="text-indigo-700">{formatPrice(Number(order.total))}</span>
-        </div>
+            <div className="bg-amber-50 rounded-xl p-3 flex flex-col gap-3 mb-4">
+              {orderItems.filter((i) => i.is_waitlist).map((item) => (
+                <ItemRow key={item.id} item={item} waitlist />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Totals */}
+        {(() => {
+          const confirmedItems = orderItems.filter((i) => !i.is_waitlist);
+          const waitlistItems = orderItems.filter((i) => i.is_waitlist);
+          const confirmedTotal = confirmedItems.reduce((s, i) => s + Number(i.unit_price) * i.quantity, 0);
+          const waitlistTotal = waitlistItems.reduce((s, i) => s + Number(i.unit_price) * i.quantity, 0);
+          const hasBoth = confirmedItems.length > 0 && waitlistItems.length > 0;
+
+          return (
+            <div className="border-t border-gray-200 pt-4 flex flex-col gap-1.5">
+              {hasBoth ? (
+                <>
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Total confirmado</span>
+                    <span className="font-semibold text-indigo-700">{formatPrice(confirmedTotal)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-amber-700">
+                    <span>Total lista de espera</span>
+                    <span className="font-semibold">{formatPrice(waitlistTotal)}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between font-bold">
+                  <span>{waitlistItems.length > 0 ? "Total lista de espera" : "Total confirmado"}</span>
+                  <span className={waitlistItems.length > 0 ? "text-amber-700" : "text-indigo-700"}>
+                    {formatPrice(Number(order.total))}
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Status & expiration — editable */}
@@ -116,6 +144,42 @@ function Detail({ label, value }: { label: string; value: string }) {
     <div>
       <p className="text-xs text-gray-400 mb-0.5">{label}</p>
       <p className="font-medium">{value}</p>
+    </div>
+  );
+}
+
+function ItemRow({
+  item,
+  waitlist = false,
+}: {
+  item: {
+    id: string;
+    quantity: number;
+    unit_price: number;
+    articles: { id: string; title: string; thumbnail_url: string | null; slug: string } | null;
+  };
+  waitlist?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+        {item.articles?.thumbnail_url ? (
+          <Image src={item.articles.thumbnail_url} alt={item.articles.title} fill className="object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">–</div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-medium line-clamp-1 ${waitlist ? "text-amber-900" : ""}`}>
+          {item.articles?.title ?? "Artículo eliminado"}
+        </p>
+        <p className={`text-xs ${waitlist ? "text-amber-600" : "text-gray-400"}`}>
+          {item.quantity} × {formatPrice(Number(item.unit_price))}
+        </p>
+      </div>
+      <p className={`text-sm font-semibold shrink-0 ${waitlist ? "text-amber-700" : ""}`}>
+        {formatPrice(Number(item.unit_price) * item.quantity)}
+      </p>
     </div>
   );
 }

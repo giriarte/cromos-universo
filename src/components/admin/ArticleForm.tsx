@@ -15,6 +15,7 @@ const schema = z.object({
   description: z.string().optional(),
   price: z.number({ message: "Ingresá un precio válido" }).positive("Debe ser mayor a 0"),
   stock: z.number({ message: "Ingresá un stock válido" }).int().min(0),
+  waitlist: z.number({ message: "Ingresá un valor válido" }).int().min(0),
   status: z.enum(["active", "inactive"]),
   category_id: z.string().nullable().optional(),
 });
@@ -44,6 +45,7 @@ export default function ArticleForm({ article, categories }: Props) {
       description: article?.description ?? "",
       price: article?.price ?? 0,
       stock: article?.stock ?? 0,
+      waitlist: article?.waitlist ?? 3,
       status: article?.status ?? "active",
       category_id: article?.category_id ?? null,
     },
@@ -144,6 +146,10 @@ export default function ArticleForm({ article, categories }: Props) {
             <input {...register("stock", { valueAsNumber: true })} type="number" className={ic(!!errors.stock)} />
           </Field>
         </div>
+
+        <Field label="Lista de espera (cupos)" error={errors.waitlist?.message}>
+          <input {...register("waitlist", { valueAsNumber: true })} type="number" className={ic(!!errors.waitlist)} />
+        </Field>
 
         <div className="grid grid-cols-2 gap-4">
           <Field label="Estado" error={errors.status?.message}>

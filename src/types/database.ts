@@ -102,6 +102,7 @@ export interface Article {
   description: string | null;
   price: number;
   stock: number;
+  waitlist: number;
   status: "active" | "inactive";
   category_id: string | null;
   thumbnail_url: string | null;
@@ -137,6 +138,7 @@ export interface OrderItem {
   article_id: string;
   quantity: number;
   unit_price: number;
+  is_waitlist: boolean;
 }
 
 export type ArticleWithImages = Article & { article_images: ArticleImage[] };
@@ -145,6 +147,7 @@ export type OrderWithItems = Order & {
 };
 
 export type CartItem = {
-  article: Pick<Article, "id" | "title" | "price" | "thumbnail_url" | "slug" | "stock">;
+  article: Pick<Article, "id" | "title" | "price" | "thumbnail_url" | "slug" | "stock" | "waitlist">;
   quantity: number;
+  isWaitlist?: boolean;
 };
