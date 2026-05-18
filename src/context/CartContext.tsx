@@ -74,6 +74,15 @@ const CartContext = createContext<{
 } | null>(null);
 
 const STORAGE_KEY = "cromos-cart";
+const TABS_KEY = "cromos-open-tabs";
+const TAB_SESSION_KEY = "cromos-tab-id";
+
+function getOpenTabs(): string[] {
+  try { return JSON.parse(localStorage.getItem(TABS_KEY) ?? "[]"); } catch { return []; }
+}
+function setOpenTabs(tabs: string[]) {
+  localStorage.setItem(TABS_KEY, JSON.stringify(tabs));
+}
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, { items: [] });
@@ -89,6 +98,56 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (parsed.length > 0) dispatch({ type: "RESTORE", items: parsed });
     } catch {}
     setIsHydrated(true);
+  }, []);
+
+  // Track open tabs so we can restore stock when the last tab closes.
+  // Each tab gets a UUID stored in sessionStorage (survives refresh, gone on close).
+  useEffect(() => {
+    let tabId = sessionStorage.getItem(TAB_SESSION_KEY);
+    if (!tabId) {
+      tabId = crypto.randomUUID();
+      sessionStorage.setItem(TAB_SESSION_KEY, tabId);
+    }
+
+    // Register this tab (filter first to avoid duplicates on refresh)
+    setOpenTabs([...getOpenTabs().filter((id) => id !== tabId), tabId]);
+
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      if (itemsRef.current.length === 0) return;
+      // Triggers the browser's native "Leave site?" confirmation dialog.
+      // Custom messages are blocked by modern browsers; the generic prompt is shown instead.
+      event.preventDefault();
+    }
+
+    function handlePageHide(event: PageTransitionEvent) {
+      if (event.persisted) return; // page entered BFCache — not a real close
+
+      const remaining = getOpenTabs().filter((id) => id !== tabId);
+      setOpenTabs(remaining);
+
+      // Last tab closing — restore stock via beacon so items don't stay reserved
+      if (remaining.length === 0 && itemsRef.current.length > 0) {
+        const payload = new Blob(
+          [JSON.stringify({
+            items: itemsRef.current.map((i) => ({
+              articleId: i.article.id,
+              quantity: i.quantity,
+              isWaitlist: i.isWaitlist ?? false,
+            })),
+          })],
+          { type: "application/json" }
+        );
+        navigator.sendBeacon("/api/cart/clear", payload);
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("pagehide", handlePageHide);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("pagehide", handlePageHide);
+    };
   }, []);
 
   useEffect(() => {

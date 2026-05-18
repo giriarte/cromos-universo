@@ -90,7 +90,7 @@ export default function CheckoutPage() {
     }
 
     clearForOrder();
-    router.push("/checkout/success");
+    router.push("/cart?pedido=ok");
   }
 
   async function onResendCode() {

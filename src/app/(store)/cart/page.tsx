@@ -2,22 +2,39 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
-import { TrashIcon, ClockIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, ClockIcon, EnvelopeIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
-export default function CartPage() {
+function CartPageInner() {
   const { items, remove, updateQty, totalPrice } = useCart();
+  const searchParams = useSearchParams();
+  const orderSuccess = searchParams.get("pedido") === "ok";
   const [busy, setBusy] = useState<string | null>(null); // articleId currently being updated
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-24">
-        <p className="text-2xl font-semibold text-gray-400 mb-4">Tu carrito está vacío</p>
-        <Link href="/" className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
-          Ver catálogo
-        </Link>
+      <div className="max-w-2xl mx-auto">
+        {orderSuccess && (
+          <div className="flex gap-4 bg-green-50 border border-green-200 rounded-2xl p-6 mb-8">
+            <CheckCircleIcon className="h-7 w-7 text-green-500 shrink-0 mt-0.5" />
+            <div className="flex flex-col gap-1">
+              <p className="font-semibold text-green-800 text-lg">¡Pedido recibido!</p>
+              <p className="text-sm text-green-700 leading-relaxed">
+                Tu pedido fue procesado correctamente. El equipo de Universo Cromos se va a contactar con vos
+                a la brevedad por email para coordinar la entrega. ¡Gracias por elegirnos!
+              </p>
+            </div>
+          </div>
+        )}
+        <div className="text-center py-16">
+          <p className="text-2xl font-semibold text-gray-400 mb-4">Tu carrito está vacío</p>
+          <Link href="/" className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
+            Ver catálogo
+          </Link>
+        </div>
       </div>
     );
   }
@@ -134,5 +151,13 @@ export default function CartPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function CartPage() {
+  return (
+    <Suspense>
+      <CartPageInner />
+    </Suspense>
   );
 }

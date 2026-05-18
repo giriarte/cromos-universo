@@ -36,7 +36,7 @@ export default function ArticleCard({ article }: Props) {
   if (waitlistAvailable) {
     badgeEl = (
       <span className="absolute top-2 left-2 bg-amber-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-        Lista de espera
+        Reservado
       </span>
     );
   } else if (fullyUnavailable) {
@@ -97,13 +97,21 @@ export default function ArticleCard({ article }: Props) {
 
         <p className="text-lg font-bold text-indigo-700 mt-auto">{formatPrice(article.price)}</p>
 
-        <button
-          disabled={buttonDisabled}
-          onClick={handleAdd}
-          className={`w-full py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${buttonClass}`}
-        >
-          {buttonLabel}
-        </button>
+        <div className="relative group/tooltip">
+          <button
+            disabled={buttonDisabled}
+            onClick={handleAdd}
+            className={`w-full py-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${buttonClass}`}
+          >
+            {buttonLabel}
+          </button>
+          {waitlistAvailable && !inCart && (
+            <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-xl bg-gray-900 text-white text-xs leading-snug px-3 py-2 text-center opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150 z-10">
+              Este artículo está reservado por otro usuario. Podés anotarte en la lista de espera y te avisaremos si queda disponible.
+              <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
