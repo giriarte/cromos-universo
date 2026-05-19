@@ -10,6 +10,10 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { title, description, price, stock, waitlist = 3, status, category_id, thumbnail_url, extra_image_urls = [] } = body;
 
+  if (stock > 3 || waitlist > 3) {
+    return NextResponse.json({ error: "El stock y la lista de espera no pueden superar 3" }, { status: 400 });
+  }
+
   const supabase = createServiceClient();
   const slug = slugify(title);
 

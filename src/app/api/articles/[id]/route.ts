@@ -11,6 +11,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const body = await req.json();
   const { title, description, price, stock, waitlist, status, category_id, thumbnail_url, extra_image_urls = [], removed_image_ids = [] } = body;
 
+  if ((stock !== undefined && stock > 3) || (waitlist !== undefined && waitlist > 3)) {
+    return NextResponse.json({ error: "El stock y la lista de espera no pueden superar 3" }, { status: 400 });
+  }
+
   const supabase = createServiceClient();
 
   const update: Record<string, unknown> = { description, price, stock, status, category_id: category_id || null, thumbnail_url };

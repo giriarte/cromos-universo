@@ -14,8 +14,8 @@ const schema = z.object({
   title: z.string().min(1, "Requerido"),
   description: z.string().optional(),
   price: z.number({ message: "Ingresá un precio válido" }).positive("Debe ser mayor a 0"),
-  stock: z.number({ message: "Ingresá un stock válido" }).int().min(0),
-  waitlist: z.number({ message: "Ingresá un valor válido" }).int().min(0),
+  stock: z.number({ message: "Ingresá un stock válido" }).int().min(0).max(3, "Máximo 3"),
+  waitlist: z.number({ message: "Ingresá un valor válido" }).int().min(0).max(3, "Máximo 3"),
   status: z.enum(["active", "inactive"]),
   category_id: z.string().nullable().optional(),
 });

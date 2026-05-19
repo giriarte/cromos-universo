@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
+import { sendOrderConfirmationEmail } from "@/lib/ses";
 import type { CartItem } from "@/types/database";
 
 export async function POST(req: NextRequest) {
@@ -38,6 +39,11 @@ export async function POST(req: NextRequest) {
         unit_price: i.article.price,
         is_waitlist: i.isWaitlist ?? false,
       }))
+    );
+
+    // Send confirmation email — non-blocking, never fails the order
+    sendOrderConfirmationEmail(buyer.email, buyer.name, order.id, items).catch((err) =>
+      console.error("[orders POST] confirmation email failed:", err)
     );
 
     return NextResponse.json({ ok: true }, { status: 201 });
