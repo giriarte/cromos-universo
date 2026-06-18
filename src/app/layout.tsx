@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7604664849250140"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
         <CartProvider>{children}</CartProvider>
       </body>
