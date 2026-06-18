@@ -9,6 +9,9 @@ const geist = Geist({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Cromos Universo",
   description: "Tu tienda de cromos y coleccionables",
+  other: {
+    "google-adsense-account": "ca-pub-7604664849250140",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
