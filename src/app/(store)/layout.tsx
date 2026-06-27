@@ -12,7 +12,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   return (
     <>
       <Header categories={categories} />
-      <main className="min-h-screen max-w-7xl mx-auto px-4 py-8">{children}</main>
+      <main className="min-h-screen">{children}</main>
       <Footer />
       <CartTimer />
     </>

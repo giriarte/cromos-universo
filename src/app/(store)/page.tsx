@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createServiceClient } from "@/lib/supabase";
 import ArticleCard from "@/components/ArticleCard";
+import HeroSection from "@/components/HeroSection";
 import type { Article, Category } from "@/types/database";
 
 export const revalidate = 60;
@@ -44,7 +45,10 @@ export default async function HomePage({
   const totalPages = Math.ceil((count ?? 0) / PER_PAGE);
 
   return (
-    <div>
+    <>
+      {!cat && page === 1 && <HeroSection />}
+
+      <div id="catalogo" className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-baseline justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">{categoryName ?? "Catálogo"}</h1>
@@ -81,7 +85,8 @@ export default async function HomePage({
           )}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

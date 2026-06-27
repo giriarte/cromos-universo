@@ -30,7 +30,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const images = article.article_images ?? [];
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="grid md:grid-cols-2 gap-10">
         <div>
           {images.length > 1 ? (

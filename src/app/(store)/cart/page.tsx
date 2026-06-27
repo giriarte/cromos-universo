@@ -21,7 +21,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto px-4 py-8">
         {orderSuccess && (
           <div className="flex gap-4 bg-green-50 border border-green-200 rounded-2xl p-6 mb-8">
             <CheckCircleIcon className="h-7 w-7 text-green-500 shrink-0 mt-0.5" />
@@ -63,7 +63,7 @@ export default function CartPage() {
   const hasWaitlistItems = items.some((i) => i.isWaitlist);
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Tu carrito</h1>
 
       <div className="flex flex-col gap-4 mb-8">

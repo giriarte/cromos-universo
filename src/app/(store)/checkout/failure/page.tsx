@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function FailurePage() {
   return (
-    <div className="text-center py-24">
+    <div className="text-center px-4 py-24">
       <div className="text-6xl mb-6">😕</div>
       <h1 className="text-3xl font-bold mb-3">El pago no pudo procesarse</h1>
       <p className="text-gray-500 mb-8">

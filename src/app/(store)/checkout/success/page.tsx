@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function SuccessPage() {
   return (
-    <div className="text-center py-24">
+    <div className="text-center px-4 py-24">
       <div className="text-6xl mb-6">✅</div>
       <h1 className="text-3xl font-bold mb-3">¡Pedido recibido!</h1>
       <p className="text-gray-500 mb-8 max-w-sm mx-auto">
