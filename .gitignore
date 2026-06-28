@@ -42,6 +42,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# temporary seeding images — not committed
+/tmp/
+
 # Claude Code — local settings and AI memory files
 .claude/settings.local.json
 memory/

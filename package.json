@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest",
     "seed-admin": "tsx --env-file=.env.local scripts/seed-admin.ts",
-    "setup-s3": "tsx --env-file=.env.local scripts/setup-s3-lifecycle.ts"
+    "setup-s3": "tsx --env-file=.env.local scripts/setup-s3-lifecycle.ts",
+    "seed-coins": "tsx --env-file=.env.local scripts/seed-coins.ts",
+    "seed-stamps": "tsx --env-file=.env.local scripts/seed-stamps.ts"
   },
   "dependencies": {
     "@auth/supabase-adapter": "^1.11.2",
